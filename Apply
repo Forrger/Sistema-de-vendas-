@@ -1,0 +1,99 @@
+import json
+from datetime import datetime
+
+# Dados iniciais
+valor_base = 100.00
+setores = {
+    "Pista": {"capacidade": 300, "vendidos": 0, "acrescimo": 0.0, "brindes": ["Pulseira do evento"]},
+    "Campo": {"capacidade": 200, "vendidos": 0, "acrescimo": 0.15, "brindes": ["Pulseira", "Adesivo"]},
+    "Arquibancada": {"capacidade": 150, "vendidos": 0, "acrescimo": 0.25, "brindes": ["Pulseira", "Adesivo", "Poster"]},
+    "VIP": {"capacidade": 80, "vendidos": 0, "acrescimo": 0.60, "brindes": ["Kit VIP", "Camiseta", "Poster"]}
+}
+formas_pagamento = ["PIX (simulado)", "Dinheiro", "Débito", "Crédito"]
+
+def salvar_transacao(transacao):
+    try:
+        with open("data/transacoes.json", "r", encoding="utf-8") as f:
+            transacoes = json.load(f)
+    except FileNotFoundError:
+        transacoes = []
+
+    transacoes.append(transacao)
+    with open("data/transacoes.json", "w", encoding="utf-8") as f:
+        json.dump(transacoes, f, ensure_ascii=False, indent=4)
+
+def escolher_setor():
+    print("\nSetores disponíveis:")
+    for i, (nome, info) in enumerate(setores.items(), start=1):
+        preco = valor_base * (1 + info["acrescimo"])
+        print(f"{i}. {nome} - R$ {preco:.2f} ({info['capacidade'] - info['vendidos']} disponíveis)")
+
+    escolha = int(input("Escolha o setor: "))
+    setor = list(setores.keys())[escolha - 1]
+    return setor
+
+def comprar_ingressos():
+    nome_cliente = input("Nome do cliente: ")
+    show_nome = input("Nome do show: ")
+    show_data = input("Data do show (dd/mm/aaaa): ")
+    membro = input("É membro/estudante do BCTec? (s/n): ").strip().lower()
+
+    matricula = None
+    if membro == "s":
+        matricula = input("Número da matrícula: ")
+
+    setor = escolher_setor()
+    quantidade = int(input("Quantidade de ingressos: "))
+
+    if quantidade > (setores[setor]["capacidade"] - setores[setor]["vendidos"]):
+        print("❌ Quantidade indisponível para este setor.")
+        return
+
+    valor_setor = valor_base * (1 + setores[setor]["acrescimo"])
+    total = valor_setor * quantidade
+
+    print("\nFormas de pagamento:")
+    for i, forma in enumerate(formas_pagamento, start=1):
+        print(f"{i}. {forma}")
+    pagamento = formas_pagamento[int(input("Escolha a forma de pagamento: ")) - 1]
+
+    setores[setor]["vendidos"] += quantidade
+
+    transacao = {
+        "cliente": nome_cliente,
+        "show": show_nome,
+        "data_show": show_data,
+        "setor": setor,
+        "quantidade": quantidade,
+        "valor_total": total,
+        "forma_pagamento": pagamento,
+        "brindes": setores[setor]["brindes"],
+        "matricula": matricula,
+        "data_compra": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    }
+
+    salvar_transacao(transacao)
+
+    print("\n✅ Compra realizada com sucesso!")
+    print("🎟 Bilhete Digital")
+    print(f"Cliente: {nome_cliente}")
+    print(f"Show: {show_nome} - {show_data}")
+    print(f"Setor: {setor}")
+    print(f"Quantidade: {quantidade}")
+    print(f"Total Pago: R$ {total:.2f}")
+    print(f"Forma de pagamento: {pagamento}")
+    print(f"Brindes: {', '.join(setores[setor]['brindes'])}")
+
+if __name__ == "__main__":
+    while True:
+        print("\n=== Sistema de Vendas de Ingressos ===")
+        print("1. Comprar ingressos")
+        print("2. Sair")
+        opcao = input("Escolha uma opção: ")
+
+        if opcao == "1":
+            comprar_ingressos()
+        elif opcao == "2":
+            break
+        else:
+            print("Opção inválida.")
