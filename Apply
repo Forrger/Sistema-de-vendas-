@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-# Dados iniciais
+
 valor_base = 100.00
 setores = {
     "Pista": {"capacidade": 300, "vendidos": 0, "acrescimo": 0.0, "brindes": ["Pulseira do evento"]},
