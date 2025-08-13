@@ -1,4 +1,4 @@
-# Sistema de Vendas de Ingressos 🎟
+# Sistema de Vendas de Ingressos 
 
 Projeto de console em Python que simula a venda de ingressos para um festival de música.
 
